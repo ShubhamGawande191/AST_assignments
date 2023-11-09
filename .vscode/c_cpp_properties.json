@@ -1,0 +1,25 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/beelzebub/ros2_ws/install/smach_msgs/include/**",
+        "/home/beelzebub/ros2_ws/install/kelo_tulip/include/**",
+        "/home/beelzebub/ros2_ws/src/install/smach_msgs/include/**",
+        "/home/beelzebub/ros2_ws/src/install/kelo_tulip/include/**",
+        "/opt/ros/humble/include/**",
+        "/home/beelzebub/ros2_ws/src/kelo_tulip/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}
