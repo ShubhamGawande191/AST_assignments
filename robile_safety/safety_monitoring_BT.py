@@ -25,25 +25,34 @@ def create_root() -> pt.behaviour.Behaviour:
 
     ### we create an "Idle" node, which is a running node to keep the robot idle
     idle = pt.behaviours.Running(name="Idle")
+
+    # instantiate behaviors
+    battery_status = BatteryStatus2bb(name="BatteryStatus2bb")
+    laser_scan = LaserScan2bb(name="LaserScan2bb")
+
+    # add battery_status and laser_scan to topics2BB
+    topics2BB.add_children([battery_status, laser_scan])
+
+    # create sequences for collision
+    collision_sequence = pt.composites.Sequence("CollisionSequence", memory=False)
+    collision_check = IsColliding(name="IsColliding")
+    stop = StopMotion(name="StopPlatform")
+    collision_sequence.add_children([collision_check, stop])
+
+    # add battery check to battery sequence
+    battery_sequence = pt.composites.Sequence("BatterySequence", memory=False)
+    battery_check = IsBatteryLow(name="IsBatteryLow")
+    rotate = Rotate(name="Rotate")
+    battery_sequence.add_children([battery_check, rotate])
     
-    """
-    TODO:  The first and second level of the tree structure is defined above, but please
-    define the rest of the tree structure.
+    # idle behavior
+    idle = pt.behaviours.Running(name="Idle")
 
-    Class definitions for your behaviours are provided in behaviours.py; you also need to fill out
-    the behaviour implementations!
-
-    HINT: Some behaviors from pt.behaviours may be useful to use as well.
-    """
-
-    ### YOUR CODE HERE ###
-
-    # TODO: construct the behavior tree structure using the nodes and behaviors defined above
-    # HINT: for reference, the sample tree structure in the README.md file might be useful
-
+    # add sequences to priorities selector
+    priorities.add_children([collision_sequence, battery_sequence, idle])
+    
+    # add topics2BB and priorities to root
     root.add_children([topics2BB, priorities])
-
-    ### YOUR CODE HERE ###
 
     return root
 
