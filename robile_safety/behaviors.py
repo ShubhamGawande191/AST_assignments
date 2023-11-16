@@ -17,23 +17,18 @@ class Rotate(pt.behaviour.Behaviour):
         # inherit all the class variables from the parent class and make it a behavior
         super(Rotate, self).__init__(name)
 
-        # TODO: initialise class variables
-        raise NotImplementedError()
+        # topic to publish rotation commands
+        self.topic_name = topic_name
+        # angular velocity to rotate the robot
+        self.ang_vel = ang_vel
+        # publisher to publish rotation commands
+        self.cmd_vel_pub = None
 
     def setup(self, **kwargs):
         """Setting up things which generally might require time to prevent delay in the tree initialisation
         """
-        self.logger.info("[ROTATE] setting up rotate behavior")
-        
-        try:
-            self.node = kwargs['node']
-        except KeyError as e:
-            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
-            raise KeyError(error_message) from e 
-
-        # TODO: setup any necessary publishers or subscribers
-
-        ### YOUR CODE HERE ###
+        self.node = kwargs['node']
+        self.cmd_vel_pub = self.node.create_publisher(Twist, self.topic_name, 10)
 
         return True
 
@@ -45,44 +40,65 @@ class Rotate(pt.behaviour.Behaviour):
         self.logger.info("[ROTATE] update: updating rotate behavior")
         self.logger.debug("%s.update()" % self.__class__.__name__)
 
-        # TODO: implement the primary function of the behavior and decide which status to return 
-        # based on the structure of your behavior tree
-
-        # Hint: to return a status, for example, SUCCESS, pt.common.Status.SUCCESS can be used
-
-        ### YOUR CODE HERE ###
-        raise NotImplementedError()
+        twist = Twist()
+        twist.angular.z = self.ang_vel
+        self.cmd_vel_pub.publish(twist)
+        
+        return pt.common.Status.RUNNING
 
 
     def terminate(self, new_status):
         """Trigerred once the execution of the behavior finishes, 
         i.e. when the status changes from RUNNING to SUCCESS or FAILURE
         """
-        self.logger.info("[ROTATE] terminate: publishing zero angular velocity")
 
-        # TODO: implement the termination of the behavior, i.e. what should happen when the behavior 
-        # finishes its execution
-
-        ### YOUR CODE HERE ###
-
+        # stop rotating when behavior finishes
+        twist = Twist()
+        twist.angular.z = 0.0
+        self.cmd_vel_pub.publish(twist)
+        self.logger.debug(f"[{self.name}] Terminating with status: {new_status}.")
         return super().terminate(new_status)
 
 class StopMotion(pt.behaviour.Behaviour):
     """Stops the robot when it is controlled using a joystick or with a cmd_vel command
     """
-    
-    # TODO: based on previous eexample, implement the behavior to stop the robot when it is controlled 
-    # by sending a cmd_vel command (eg: teleop_twist_keyboard)
 
-    ### YOUR CODE HERE ###
+    def __init__(self, name: str, topic_name="/cmd_vel"):
+        super(StopMotion, self).__init__(name)
+        # topic to publish stop commands
+        self.topic_name = topic_name
+        # publisher for stop commands
+        self.cmd_vel_pub = None
 
+    def setup(self, **kwargs):
+        """Sets up the publisher to publish stop commands
+        """
+        self.node = kwargs['node']
+        if self.node is None:
+            raise RuntimeError("Node not found in kwargs")
+        self.cmd_vel_pub = self.node.create_publisher(Twist, self.topic_name, 10)
+        
+        return True
+
+    def update(self):
+        """Publishes a zero velocity command to stop the robot
+        """
+        twist = Twist()  
+        self.cmd_vel_pub.publish(twist)
+        return pt.common.Status.SUCCESS
+
+    def terminate(self, new_status):
+        """Handles the termination of thestop motion behavior
+        """
+        self.logger.debug(f"[{self.name}] Terminating with status: {new_status}.")
 
 class BatteryStatus2bb(ptr.subscribers.ToBlackboard):
     """Checks the battery status
     """
+    
     def __init__(self, battery_voltage_topic_name: str="/battery_voltage",
                  name: str='Battery2BB',
-                 threshold: float=30.0):
+                 threshold: float=20.0):
         super().__init__(name=name,
                          topic_name=battery_voltage_topic_name,
                          topic_type=Float32,
@@ -91,50 +107,86 @@ class BatteryStatus2bb(ptr.subscribers.ToBlackboard):
                          clearing_policy=pt.common.ClearingPolicy.NEVER,  # to decide when data should be cleared/reset.
                          qos_profile=ptr.utilities.qos_profile_unlatched())
         self.blackboard.register_key(key='battery_low_warning', access=pt.common.Access.WRITE)
-
-        # TODO: initialise class variables
-        ### YOUR CODE HERE ###
-        raise NotImplementedError()
-
+        self.threshold = threshold # low battery level threshold
 
     def update(self):
         """Calls the parent to write the raw data to the blackboard and then check against the
         threshold to determine if a low warning flag should also be updated.
         """
-        self.logger.info('[BATTERY] update: running battery_status2bb update')
-        self.logger.debug("%s.update()" % self.__class__.__name__)
-        
-        """check battery voltage level stored in self.blackboard.battery. By comparing with 
-        threshold value, update the value of self.blackboad.battery_low_warning
-        """
+        super().update()
 
-        # TODO: based on the battery voltage level, update the value of self.blackboard.battery_low_warning
-        # and return the status of the behavior based on your logic of the behavior tree
+        # check battery level against threshold
+        if self.blackboard.battery < self.threshold:
+            self.blackboard.battery_low_warning = True
+        else:
+            self.blackboard.battery_low_warning = False
 
-        ### YOUR CODE HERE ###
-        raise NotImplementedError()
-
+        return pt.common.Status.SUCCESS
 
 class LaserScan2bb(ptr.subscribers.ToBlackboard):
     """Checks the laser scan measurements to avoid possible collisions.
     """
+    
     def __init__(self, topic_name: str="/scan",
-                 name: str='Scan2BB',
+                 name: str='LaserScan2BB',
                  safe_range: float=0.25):
         super().__init__(name=name,
                          topic_name=topic_name,
                          topic_type=LaserScan,
                          blackboard_variables={'laser_scan':'ranges'},
                          clearing_policy=pt.common.ClearingPolicy.NEVER,  # to decide when data should be cleared/reset.
-                         qos_profile=QoSProfile(reliability=QoSReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,
-                                                history=QoSHistoryPolicy.RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+                         qos_profile=QoSProfile(reliability=QoSReliabilityPolicy.BEST_EFFORT,
+                                                history=QoSHistoryPolicy.KEEP_LAST,
                                                 depth=10))
         
-        # TODO: initialise class variables and blackboard variables
-        ### YOUR CODE HERE ###
-        raise NotImplementedError()
+        self.safe_range = safe_range    
+        self.blackboard.register_key(key='collision_detected', access=pt.common.Access.WRITE)
 
     def update(self):
-        # TODO: impletment the update function to check the laser scan data and update the blackboard variable
-        ### YOUR CODE HERE ###
-        raise NotImplementedError()
+        """Checks laser scan measurements to detect possible collisions
+        """
+        super().update()
+
+        # check if the robot collided
+        if min(self.blackboard.laser_scan) < self.safe_range:
+            self.blackboard.collision_detected = True
+        else:
+            self.blackboard.collision_detected = False
+
+        return pt.common.Status.SUCCESS
+
+class IsBatteryLow(pt.behaviour.Behaviour):
+    def __init__(self, name="IsBatteryLow", low_battery_threshold=20.0):
+        super().__init__(name)
+        self.low_battery_threshold = low_battery_threshold
+        self.blackboard = pt.blackboard.Client(name=self.name)
+        self.blackboard.register_key(key="battery", access=pt.common.Access.READ)
+
+    def update(self):
+        """Checks if the battery level is below the threshold
+        """
+        battery_level = self.blackboard.get("battery") 
+        if battery_level is None:
+            return pt.common.Status.RUNNING
+        if battery_level < self.low_battery_threshold:
+            return pt.common.Status.SUCCESS  # Battery level is low
+        else:
+            return pt.common.Status.FAILURE  # Battery level is acceptable
+
+class IsColliding(pt.behaviour.Behaviour):
+    def __init__(self, name="IsColliding", collision_threshold=0.5):
+        super().__init__(name)
+        self.collision_threshold = collision_threshold
+        self.blackboard = pt.blackboard.Client(name=self.name)
+        self.blackboard.register_key(key="laser_scan", access=pt.common.Access.READ)
+
+    def update(self):
+        """Check if the robot is colliding
+        """
+        laser_data = self.blackboard.get("laser_scan")
+        if laser_data is None:
+            return pt.common.Status.RUNNING  # No laser data yet
+        if laser_data and any(distance < self.collision_threshold for distance in laser_data):
+            return pt.common.Status.SUCCESS  # Collision risk detected
+        else:
+            return pt.common.Status.FAILURE  # No collision risk
