@@ -8,6 +8,5 @@ def generate_launch_description():
             executable='safety_monitoring_bt',
             name='safety_monitoring_bt_node',
             output='screen',
-            parameters=[{'param_name': 'param_value'}]
         ),
     ])
