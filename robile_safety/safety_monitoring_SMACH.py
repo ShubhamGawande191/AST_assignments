@@ -16,8 +16,6 @@ class MonitorBatteryAndCollision(smach.State):
     """State to monitor the battery level and possible collisions
     """
     def __init__(self, node):
-        # TODO: define outcomes, class variables, and desired publisher/subscribers
-        ### YOUR CODE HERE ###
         smach.State.__init__(self, outcomes=['low_battery', 'collision_detected', 'idle'])
         self.node = node
         self.battery_level_sub = self.node.create_subscription(Float32, 'battery_voltage', self.battery_callback,10)
@@ -35,12 +33,10 @@ class MonitorBatteryAndCollision(smach.State):
             self.collision_detected = True
         else:
             self.collision_detected = False
-        # raise NotImplementedError()
 
     def execute(self, userdata):
-        # TODO: implement state execution logic and return outcome
-        ### YOUR CODE HERE ###
-        # battery level threshold
+        """Checks the battery level and possible collisions
+        """
         battery_threshold = 20.0
 
         while rclpy.ok():
@@ -54,25 +50,19 @@ class MonitorBatteryAndCollision(smach.State):
                 return 'low_battery'
             # safe to continue
             else:
-                return 'safe'
+                return 'idle'
 
-        # raise NotImplementedError()
-
-    
 class RotateBase(smach.State):
     """State to rotate the Robile base
     """
     def __init__(self, node):
-        # TODO: define outcomes, class variables, and desired publisher/subscribers
-        ### YOUR CODE HERE ###
         smach.State.__init__(self, outcomes=['rotated', 'failed'])
         self.node = node
         self.cmd_vel_pub = self.node.create_publisher(Twist, '/cmd_vel', 10)
-        # raise NotImplementedError()
 
     def execute(self, userdata):
-        # TODO: implement state execution logic and return outcome
-        ### YOUR CODE HERE ###
+        """Rotates the base for 5 seconds
+        """
         twist = Twist()
         twist.angular.z = 0.5
         self.cmd_vel_pub.publish(twist)
@@ -84,7 +74,6 @@ class RotateBase(smach.State):
         twist.angular.z = 0.0
         self.cmd_vel_pub.publish(twist)
         return 'rotated'
-        # raise NotImplementedError()
 
 class Stop(smach.State):
     def __init__(self, node):
@@ -109,21 +98,14 @@ class Idle(smach.State):
         time.sleep(1)
         return 'idle'
 
-
-# TODO: define any additional if necessary
-### YOUR CODE HERE ###
-
 def main(args=None):
     """Main function to initialise and execute the state machine
     """
-
-    # TODO: make it a ROS2 node, set any threshold values, and define state transitions
-    ### YOUR CODE HERE ###
     rclpy.init(args=args)
     node = rclpy.create_node('sm_node')
 
     # create SMACH state machine
-    sm = smach.StateMachine(outcomes=['executed'])
+    sm = smach.StateMachine(outcomes=['executed', 'terminated'])
 
     with sm:
         # add monitor and collision states
@@ -137,19 +119,10 @@ def main(args=None):
         smach.StateMachine.add('STOP', Stop(node),
                                  transitions={'stopped': 'MONITOR'})
         smach.StateMachine.add('IDLE', Idle(node),
-                                 transitions={'idle': 'IDLE'})
-
-    # while rclpy.ok():
-    #     rclpy.spin_once(node)
-    #     if outcome == 'idle':
-    #         break
-    #     elif outcome == 'low_battery':
-    #         break
-    #     elif outcome == 'collision_detected':
-    #         break
+                                 transitions={'idle': 'MONITOR'})
     
     # execute SMACH plan
-    outcome = sm.execute
+    outcome = sm.execute()
 
     # shutdown node
     node.destroy_node()
