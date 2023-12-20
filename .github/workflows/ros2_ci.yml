@@ -60,3 +60,4 @@ jobs:
         source /opt/ros/humble/setup.bash
         colcon test
         colcon test-result --verbose
+      shell: bash
