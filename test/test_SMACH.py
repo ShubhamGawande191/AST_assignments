@@ -53,7 +53,7 @@ class TestSafetyMonitoring(unittest.TestCase):
         laser_msg.ranges = [0.4, 0.3, 0.2]
         monitor_state.scan_callback(laser_msg)
         self.assertEqual(mock_execute(None), 'collision_detected')
-   
+
     def test_rotate_base(self):
         rotate_state = RotateBase(self.node)
         rotate_state.cmd_vel_pub = MagicMock()  # Mock the publisher
