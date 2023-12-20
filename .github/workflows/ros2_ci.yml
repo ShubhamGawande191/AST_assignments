@@ -54,11 +54,8 @@ jobs:
         colcon build --symlink-install
       shell: bash
 
-    - name: Run tests
+    - name: Run unittest tests
       run: |
         cd robile_safety
-        source /opt/ros/humble/setup.bash
-        colcon build --symlink-install
-        colcon test
-        colcon test-result --verbose
+        python3 -m unittest discover test
       shell: bash
