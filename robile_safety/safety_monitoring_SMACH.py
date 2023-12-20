@@ -63,16 +63,17 @@ class RotateBase(smach.State):
     def execute(self, userdata):
         """Rotates the base for 5 seconds
         """
-        twist = Twist()
-        twist.angular.z = 0.5
-        self.cmd_vel_pub.publish(twist)
+        twist_start = Twist()
+        twist_start.angular.z = 0.5
+        self.cmd_vel_pub.publish(twist_start)
 
         # rotate for 5 seconds
         time.sleep(5)
 
         # stop rotating
-        twist.angular.z = 0.0
-        self.cmd_vel_pub.publish(twist)
+        # twist.angular.z = 0.0
+        twist_stop = Twist()
+        self.cmd_vel_pub.publish(twist_stop)
         return 'rotated'
 
 class Stop(smach.State):
