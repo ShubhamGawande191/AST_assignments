@@ -64,7 +64,7 @@ class TestSafetyMonitoring(unittest.TestCase):
             call(Twist(angular=Vector3(z=0.5))),  # Expected start rotation call
             call(Twist())  # Expected stop rotation call
         ]
-        
+
         # Verify that the calls were made with the expected arguments
         rotate_state.cmd_vel_pub.publish.assert_has_calls(expected_calls, any_order=False)
 
