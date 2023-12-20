@@ -58,7 +58,7 @@ class TestSafetyMonitoring(unittest.TestCase):
         rotate_state = RotateBase(self.node)
         rotate_state.cmd_vel_pub = MagicMock()  # Mock the publisher
         rotate_state.execute(None)
-        
+
         # Create the expected calls
         expected_calls = [
             call(Twist(angular=Vector3(z=0.5))),  # Expected start rotation call
