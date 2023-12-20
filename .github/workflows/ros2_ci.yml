@@ -56,8 +56,9 @@ jobs:
 
     - name: Run tests
       run: |
-        cd test
+        cd robile_safety
         source /opt/ros/humble/setup.bash
+        colcon build --symlink-install
         colcon test
         colcon test-result --verbose
       shell: bash
