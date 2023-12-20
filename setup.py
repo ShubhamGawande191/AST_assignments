@@ -14,18 +14,18 @@ setup(
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share/', package_name, 'launch'), glob('launch/*.py')),
     ],
-    install_requires=['setuptools'],
+    install_requires=['setuptools', 'py_trees', 'rclpy'],
     zip_safe=True,
     maintainer='beelzebub',
     maintainer_email='shubhamgawande191@gmail.com',
     description='TODO: Package description',
     license='TODO: License declaration',
     tests_require=['pytest'],
+    test_suite='test',
     entry_points={
         'console_scripts': [
         'safety_monitoring_bt = robile_safety.safety_monitoring_BT:main',
         'safety_monitoring_smach = robile_safety.safety_monitoring_SMACH:main',
-        'behaviors = robile_safety.behaviors:main',
         ],
     },
 )
