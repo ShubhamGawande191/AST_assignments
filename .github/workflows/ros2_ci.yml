@@ -2,7 +2,7 @@ name: ROS2 CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, unittest ]
   pull_request:
     branches: [ main ]
 
@@ -44,15 +44,18 @@ jobs:
 
     - name: Install package dependencies
       run: |
-        rosdep install --from-paths src --ignore-src --rosdistro humble -y
+        cd robile_safety
+        rosdep install --from-paths . --ignore-src --rosdistro humble -y
 
     - name: Build the package
       run: |
+        cd robile_safety
         source /opt/ros/humble/setup.bash
         colcon build --symlink-install
 
     - name: Run tests
       run: |
+        cd robile_safety
         source /opt/ros/humble/setup.bash
         colcon test
         colcon test-result --verbose
