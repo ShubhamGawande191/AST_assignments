@@ -30,4 +30,4 @@ class TestNumberOfRobots(unittest.TestCase):
         node.destroy_node()
 
 if __name__ == '__main__':
-    unittest.main() 
+    unittest.main()
