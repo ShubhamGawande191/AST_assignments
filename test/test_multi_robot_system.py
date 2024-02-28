@@ -1,7 +1,6 @@
 import sys
 import unittest
 import rclpy
-from rclpy.node import Node
 
 class TestNumberOfRobots(unittest.TestCase):
     @classmethod
