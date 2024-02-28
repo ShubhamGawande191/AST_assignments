@@ -4,10 +4,10 @@
 import os
 
 from ament_index_python.packages import get_package_share_directory
-from launch import LaunchDescription, LaunchContext
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, GroupAction
+from launch import LaunchDescription
+from launch.actions import IncludeLaunchDescription, GroupAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import Command, FindExecutable, PathJoinSubstitution, LaunchConfiguration
+from launch.substitutions import Command, FindExecutable, PathJoinSubstitution
 from launch_ros.substitutions import FindPackageShare
 from launch.substitutions import TextSubstitution
 from launch_ros.actions import Node
@@ -69,7 +69,7 @@ def generate_launch_description():
     robot_nodes = []
     for i in range(number_of_robots):
         robot_name = f'robot_{i}'
-        x_pose = str(1.0 * i)  
+        x_pose = str(1.0 * i)
         y_pose = '-3.5'
         robot_nodes.append(generate_robot_nodes(robot_name, x_pose, y_pose))
 
