@@ -13,6 +13,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share/', package_name, 'launch'), glob('launch/*.py')),
+        (os.path.join('share/', package_name, 'urdf'), glob('urdf/*.xacro')),
     ],
     install_requires=['setuptools', 'py_trees', 'rclpy'],
     zip_safe=True,

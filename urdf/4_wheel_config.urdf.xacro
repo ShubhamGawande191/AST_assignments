@@ -1,0 +1,76 @@
+<?xml version='1.0'?>
+
+<!--
+Copyright (c) 2021
+KELO Robotics GmbH
+
+Author:
+Sushant Chavan
+
+
+This software is published under a dual-license: GNU Lesser General Public
+License LGPL 2.1 and BSD license. The dual-license implies that users of this
+code may choose which terms they prefer.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+* Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+* Neither the name of Locomotec nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License LGPL as
+published by the Free Software Foundation, either version 2.1 of the
+License, or (at your option) any later version or the BSD license.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Lesser General Public License LGPL and the BSD license for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License LGPL and BSD license along with this program.
+-->
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="4_wheel_config" >
+
+    <xacro:arg name="movable_joints" default="true"/>
+
+    <!-- Include desired robile bricks -->
+    <xacro:include filename="$(find robile_description)/urdf/robile_bricks/robile_active_wheel_brick.urdf.xacro" />
+    <xacro:include filename="$(find robile_description)/urdf/robile_bricks/robile_cpu_brick.urdf.xacro" />
+    <xacro:include filename="$(find robile_description)/urdf/robile_bricks/robile_master_battery_brick.urdf.xacro" />
+
+    <link name="base_link"/>
+
+    <!-- Build platform using robile bricks -->
+    <xacro:robile_active_wheel_brick name="robile_1" parent="base_link" movable_joints="$(arg movable_joints)">
+        <origin xyz="0.233 0.1165 0.05" rpy="0.0 0.0 0.0"/>
+    </xacro:robile_active_wheel_brick>
+
+    <xacro:robile_active_wheel_brick name="robile_2" parent="base_link" movable_joints="$(arg movable_joints)">
+        <origin xyz="0.233 -0.1165 0.05" rpy="0.0 0.0 0.0"/>
+    </xacro:robile_active_wheel_brick>
+
+    <xacro:robile_cpu_brick name="robile_3" parent="base_link">
+        <origin xyz="0.0 0.1165 0.05" rpy="0.0 0.0 0.0"/>
+    </xacro:robile_cpu_brick>
+
+    <xacro:robile_master_battery_brick name="robile_4" parent="base_link">
+        <origin xyz="0.0 -0.1165 0.05" rpy="0.0 0.0 0.0"/>
+    </xacro:robile_master_battery_brick>
+
+    <xacro:robile_active_wheel_brick name="robile_5" parent="base_link" movable_joints="$(arg movable_joints)">
+        <origin xyz="-0.233 0.1165 0.05" rpy="0.0 0.0 0.0"/>
+    </xacro:robile_active_wheel_brick>
+
+    <xacro:robile_active_wheel_brick name="robile_6" parent="base_link" movable_joints="$(arg movable_joints)">
+        <origin xyz="-0.233 -0.1165 0.05" rpy="0.0 0.0 0.0"/>
+    </xacro:robile_active_wheel_brick>
+</robot>
